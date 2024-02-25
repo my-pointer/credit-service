@@ -4,8 +4,8 @@ import { TBalance, TBalanceTransaction, TCreditInfo, TCreditTransaction } from "
 import { baseResponse, baseResponseWithData } from "../utils/baseResponse";
 import { LOCALIZE as l } from "../constants/localization";
 import { creditActionEnum } from "../enums/credit";
-import { TPayForProduct } from "../interfaces/pay";
-import { pointCalculate } from "../utils/point";
+import { TExchangePointWithBalance, TPayForProduct } from "../interfaces/pay";
+import { pointCalculate, pointExchangeCalculate } from "../utils/point";
 
 const initialCredit = async (customerId: number, username: string) => {
 	try {
@@ -117,5 +117,53 @@ const payForProduct = async (payload: TPayForProduct) => {
 	}
 };
 
-export { initialCredit, getCreditByCustomerId, getBalanceByCustomerId, payForProduct };
+const exchangePoint = async (payload: TExchangePointWithBalance) => {
+	try {
+		const findUserBalance = await getBalanceByCustomerId(payload.customerId);
+		let userBalance = 0;
+		if (findUserBalance !== null) {
+			userBalance = findUserBalance.data!.dataValues.balance;
+		}
+
+		const findUserPoint = await getCreditByCustomerId(payload.customerId);
+		let userPoint = 0;
+		if (findUserPoint !== null) {
+			userPoint = findUserPoint.data!.dataValues.point;
+		}
+
+		const balanceReceived = pointExchangeCalculate(userPoint);
+		await balanceTransactionModel.create({
+			customerId: payload.customerId,
+			previousBalance: userBalance,
+			currentBalance: userBalance + balanceReceived,
+			action: creditActionEnum.EXCHANGED,
+		});
+		await balanceModel.update(
+			{ customerId: payload.customerId, balance: userBalance + balanceReceived },
+			{ where: { customerId: payload.customerId } }
+		);
+
+		await creditTransactionModel.create({
+			customerId: payload.customerId,
+			previousPoint: userPoint,
+			currentPoint: balanceReceived === 0 ? userPoint : POINT_DEFAULT,
+			action: creditActionEnum.EXCHANGED,
+		});
+		await creditInfoModel.update(
+			{
+				point: balanceReceived === 0 ? userPoint : POINT_DEFAULT,
+				cardNumber: findUserPoint.data!.dataValues.cardNumber,
+				cardHolderName: findUserPoint.data!.dataValues.cardHolderName,
+				customerId: payload.customerId,
+			},
+			{ where: { customerId: payload.customerId } }
+		);
+
+		return baseResponse(200, l.EXCHANGE_POINT_SUCCESS);
+	} catch (error) {
+		return baseResponse(500, (error as Error).message);
+	}
+};
+
+export { initialCredit, getCreditByCustomerId, getBalanceByCustomerId, payForProduct, exchangePoint };
 
