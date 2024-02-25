@@ -47,7 +47,7 @@ const initialCredit = async (customerId: number, username: string) => {
 const getCreditByCustomerId = async (customerId: number) => {
 	try {
 		const userCredit = await creditInfoModel.findOne({ where: { customerId } });
-		const response = baseResponseWithData(200, l.SUCCESS, userCredit);
+		const response = baseResponseWithData(userCredit !== null ? 200 : 404, l.SUCCESS, userCredit);
 		return response;
 	} catch (error) {
 		return baseResponse(500, (error as Error).message);
@@ -57,7 +57,7 @@ const getCreditByCustomerId = async (customerId: number) => {
 const getBalanceByCustomerId = async (customerId: number) => {
 	try {
 		const userBalance = await balanceModel.findOne({ where: { customerId } });
-		const response = baseResponseWithData(200, l.SUCCESS, userBalance);
+		const response = baseResponseWithData(userBalance !== null ? 200 : 404, l.SUCCESS, userBalance);
 		return response;
 	} catch (error) {
 		return baseResponse(500, (error as Error).message);

@@ -17,7 +17,7 @@ app.guard(
 		return app.group("/api/v1/credit", (router) => {
 			return router
 				.get("/", () => "Hello credit service")
-				.get("/:customerId", async ({ set, params }) => {
+				.get("/point/:customerId", async ({ set, params }) => {
 					const customerId = params.customerId;
 					const response = await getCreditByCustomerId(+customerId);
 					set.status = response.status;
