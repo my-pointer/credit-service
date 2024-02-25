@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import creditDb from "./db/connection";
 import { TCreditInfo } from "./interfaces/credit";
-import { initialCredit } from "./services/credit";
+import { getCreditByCustomerId, initialCredit } from "./services/credit";
 import { creditInfoModel } from "./db/model";
 
 const app = new Elysia();
@@ -17,8 +17,11 @@ app.guard(
 		return app.group("/api/v1/credit", (router) => {
 			return router
 				.get("/", () => "Hello credit service")
-				.get("/user/:userId", ({ set, params, body }) => {
-					return "asd";
+				.get("/:customerId", async ({ set, params }) => {
+					const customerId = params.customerId;
+					const response = await getCreditByCustomerId(+customerId);
+					set.status = response.status;
+					return response;
 				})
 				.post("/init", async ({ set, body }) => {
 					const payload = body as TCreditInfo;

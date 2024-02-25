@@ -1,7 +1,7 @@
 import { BALANCE_DEFAULT, POINT_DEFAULT } from "../constants/credit";
 import { balanceModel, balanceTransactionModel, creditInfoModel, creditTransactionModel } from "../db/model";
 import { TBalance, TBalanceTransaction, TCreditInfo, TCreditTransaction } from "../interfaces/credit";
-import { baseResponse } from "../utils/baseResponse";
+import { baseResponse, baseResponseWithData } from "../utils/baseResponse";
 import { LOCALIZE as l } from "../constants/localization";
 import { creditActionEnum } from "../enums/credit";
 
@@ -44,5 +44,15 @@ const initialCredit = async (customerId: number, username: string) => {
 	}
 };
 
-export { initialCredit };
+const getCreditByCustomerId = async (customerId: number) => {
+	try {
+		const userCredit = await creditInfoModel.findOne({ where: { customerId } });
+		const response = baseResponseWithData(200, l.SUCCESS, userCredit);
+		return response;
+	} catch (error) {
+		return baseResponse(500, (error as Error).message);
+	}
+};
+
+export { initialCredit, getCreditByCustomerId };
 
