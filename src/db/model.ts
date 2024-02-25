@@ -7,13 +7,14 @@ const creditInfoModel = creditDb.define(
 	{
 		point: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 		cardNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
+		cardHolderName: { type: DataTypes.STRING, allowNull: false },
 		customerId: { type: DataTypes.INTEGER, allowNull: false, unique: true },
 	},
 	{ tableName: "tbm_credit_info" }
 );
 
 const creditTransactionModel = creditDb.define(
-	"credit_transaction",
+	"creditTransaction",
 	{
 		customerId: { type: DataTypes.INTEGER, allowNull: false },
 		previousPoint: { type: DataTypes.INTEGER, allowNull: false },
@@ -32,5 +33,16 @@ const balanceModel = creditDb.define(
 	{ tableName: "tbm_balance" }
 );
 
-export { creditInfoModel, creditTransactionModel, balanceModel };
+const balanceTransactionModel = creditDb.define(
+	"balanceTransaction",
+	{
+		customerId: { type: DataTypes.INTEGER, allowNull: false },
+		previousBalance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+		currentBalance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+		action: { type: DataTypes.ENUM, values: [creditActionEnum.RECEIVED, creditActionEnum.EXCHANGED] },
+	},
+	{ tableName: "tbt_balance_transaction" }
+);
+
+export { creditInfoModel, creditTransactionModel, balanceModel, balanceTransactionModel };
 

@@ -1,21 +1,30 @@
 import { Elysia } from "elysia";
 import creditDb from "./db/connection";
+import { TCreditInfo } from "./interfaces/credit";
+import { initialCredit } from "./services/credit";
+import { creditInfoModel } from "./db/model";
 
 const app = new Elysia();
 const PORT = process.env.PORT!;
 
 app.guard(
 	{
-		beforeHandle({ set, cookie: { accessToken } }) {
-			if (!accessToken.value) return (set.status = "Unauthorized");
+		beforeHandle({ set, headers }) {
+			if (!headers.authorization) return (set.status = "Unauthorized");
 		},
 	},
 	(app) => {
 		return app.group("/api/v1/credit", (router) => {
 			return router
 				.get("/", () => "Hello credit service")
-				.get("/user/:userId", ({ set, params }) => {
+				.get("/user/:userId", ({ set, params, body }) => {
 					return "asd";
+				})
+				.post("/init", async ({ set, body }) => {
+					const payload = body as TCreditInfo;
+					const response = await initialCredit(payload.customerId, payload.cardHolderName);
+					set.status = response.status;
+					return response;
 				});
 		});
 	}
