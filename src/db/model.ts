@@ -39,7 +39,10 @@ const balanceTransactionModel = creditDb.define(
 		customerId: { type: DataTypes.INTEGER, allowNull: false },
 		previousBalance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 		currentBalance: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
-		action: { type: DataTypes.ENUM, values: [creditActionEnum.RECEIVED, creditActionEnum.EXCHANGED] },
+		action: {
+			type: DataTypes.ENUM,
+			values: [creditActionEnum.RECEIVED, creditActionEnum.EXCHANGED, creditActionEnum.PAY],
+		},
 	},
 	{ tableName: "tbt_balance_transaction" }
 );

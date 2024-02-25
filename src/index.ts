@@ -1,8 +1,8 @@
 import { Elysia } from "elysia";
 import creditDb from "./db/connection";
 import { TCreditInfo } from "./interfaces/credit";
-import { getBalanceByCustomerId, getCreditByCustomerId, initialCredit } from "./services/credit";
-import { creditInfoModel } from "./db/model";
+import { getBalanceByCustomerId, getCreditByCustomerId, initialCredit, payForProduct } from "./services/credit";
+import { TPayForProduct } from "./interfaces/pay";
 
 const app = new Elysia();
 const PORT = process.env.PORT!;
@@ -26,6 +26,12 @@ app.guard(
 				.get("/balance/:customerId", async ({ set, params }) => {
 					const customerId = params.customerId;
 					const response = await getBalanceByCustomerId(+customerId);
+					set.status = response.status;
+					return response;
+				})
+				.post("/pay", async ({ set, params, body }) => {
+					const payload = body as TPayForProduct;
+					const response = await payForProduct(payload);
 					set.status = response.status;
 					return response;
 				})

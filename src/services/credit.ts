@@ -4,6 +4,8 @@ import { TBalance, TBalanceTransaction, TCreditInfo, TCreditTransaction } from "
 import { baseResponse, baseResponseWithData } from "../utils/baseResponse";
 import { LOCALIZE as l } from "../constants/localization";
 import { creditActionEnum } from "../enums/credit";
+import { TPayForProduct } from "../interfaces/pay";
+import { pointCalculate } from "../utils/point";
 
 const initialCredit = async (customerId: number, username: string) => {
 	try {
@@ -64,5 +66,56 @@ const getBalanceByCustomerId = async (customerId: number) => {
 	}
 };
 
-export { initialCredit, getCreditByCustomerId, getBalanceByCustomerId };
+const payForProduct = async (payload: TPayForProduct) => {
+	try {
+		const findUserBalance = await getBalanceByCustomerId(payload.customerId);
+		let userBalance = 0;
+		if (findUserBalance !== null) {
+			userBalance = findUserBalance.data!.dataValues.balance;
+		}
+
+		const findUserPoint = await getCreditByCustomerId(payload.customerId);
+		let userPoint = 0;
+		if (findUserPoint !== null) {
+			userPoint = findUserPoint.data!.dataValues.point;
+		}
+
+		if (userBalance < payload.price) {
+			return baseResponse(400, l.BALANCE_NOT_ENOUGH);
+		}
+
+		await balanceTransactionModel.create({
+			customerId: payload.customerId,
+			previousBalance: userBalance,
+			currentBalance: userBalance - payload.price,
+			action: creditActionEnum.PAY,
+		});
+		await balanceModel.update(
+			{ customerId: payload.customerId, balance: userBalance - payload.price },
+			{ where: { customerId: payload.customerId } }
+		);
+		const receivedPoint = pointCalculate(payload.price);
+		await creditTransactionModel.create({
+			customerId: payload.customerId,
+			previousPoint: userPoint,
+			currentPoint: userPoint + receivedPoint,
+			action: creditActionEnum.RECEIVED,
+		});
+		await creditInfoModel.update(
+			{
+				point: userPoint + receivedPoint,
+				cardNumber: findUserPoint.data!.dataValues.cardNumber,
+				cardHolderName: findUserPoint.data!.dataValues.cardHolderName,
+				customerId: payload.customerId,
+			},
+			{ where: { customerId: payload.customerId } }
+		);
+
+		return baseResponse(200, l.PAYMENT_SUCCESS);
+	} catch (error) {
+		return baseResponse(500, (error as Error).message);
+	}
+};
+
+export { initialCredit, getCreditByCustomerId, getBalanceByCustomerId, payForProduct };
 
