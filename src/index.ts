@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import creditDb from "./db/connection";
 import { TCreditInfo } from "./interfaces/credit";
-import { getCreditByCustomerId, initialCredit } from "./services/credit";
+import { getBalanceByCustomerId, getCreditByCustomerId, initialCredit } from "./services/credit";
 import { creditInfoModel } from "./db/model";
 
 const app = new Elysia();
@@ -20,6 +20,12 @@ app.guard(
 				.get("/:customerId", async ({ set, params }) => {
 					const customerId = params.customerId;
 					const response = await getCreditByCustomerId(+customerId);
+					set.status = response.status;
+					return response;
+				})
+				.get("/balance/:customerId", async ({ set, params }) => {
+					const customerId = params.customerId;
+					const response = await getBalanceByCustomerId(+customerId);
 					set.status = response.status;
 					return response;
 				})

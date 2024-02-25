@@ -54,5 +54,15 @@ const getCreditByCustomerId = async (customerId: number) => {
 	}
 };
 
-export { initialCredit, getCreditByCustomerId };
+const getBalanceByCustomerId = async (customerId: number) => {
+	try {
+		const userBalance = await balanceModel.findOne({ where: { customerId } });
+		const response = baseResponseWithData(200, l.SUCCESS, userBalance);
+		return response;
+	} catch (error) {
+		return baseResponse(500, (error as Error).message);
+	}
+};
+
+export { initialCredit, getCreditByCustomerId, getBalanceByCustomerId };
 
