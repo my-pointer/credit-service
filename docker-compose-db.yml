@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: user-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: my-point-user
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_user_data:/var/lib/mysql
+
+  mysql2:
+    image: mysql:latest
+    container_name: credit-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: my-point-credit
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_credit_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-user
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_USER: admin
+      PMA_PASSWORD: admin
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  phpmyadmin2:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-credit
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql2
+      PMA_USER: admin
+      PMA_PASSWORD: admin
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql2
+
+volumes:
+  mysql_user_data:
+  mysql_credit_data:
+
