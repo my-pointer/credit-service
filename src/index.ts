@@ -9,9 +9,12 @@ import {
 	payForProduct,
 } from "./services/credit";
 import { TExchangePointWithBalance, TPayForProduct } from "./interfaces/pay";
+import cors from "@elysiajs/cors";
 
 const app = new Elysia();
 const PORT = process.env.PORT!;
+
+app.use(cors())
 
 app.guard(
 	{
