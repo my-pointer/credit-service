@@ -1,15 +1,12 @@
-# Elysia with Bun runtime
+# Credit service
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
+## Features
 
-## Development
-To start the development server run:
-```bash
-bun run dev
-```
+- Get user point
+- Get user balance
+- Pay for product
+- Exchange point
+- Init user point and balance
 
-Open http://localhost:3000/ with your browser to see the result.
+### Power by Elysia with Bun runtime
+
